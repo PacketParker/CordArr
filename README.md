@@ -25,6 +25,8 @@
 
 CordArr is a self-hosted Discord bot that allows you to add new movies or shows to your Radarr/Sonarr libraries, and allow users to create temporary Jellyfin accounts on your server.
 
+*NOTE: Sonarr support is currently in the works*
+
 # Instructions
 
 CordArr is built on Python and requires you to install all of the dependencies in the `requirements.txt` file. To do this, you can run the pip install command like `pip install -r requirements.txt`
