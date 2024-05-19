@@ -35,7 +35,11 @@ except FileNotFoundError:
         "ENABLE_JELLYFIN_TEMP_ACCOUNTS": "",
     }
 
-    config["JELLYFIN_ACCOUNTS"] = {"JELLYFIN_URL": "", "JELLYFIN_API_KEY": ""}
+    config["JELLYFIN_ACCOUNTS"] = {
+        "JELLYFIN_URL": "",
+        "JELLYFIN_API_KEY": "",
+        "ACCOUNT_TIME": ""
+    }
 
     with open("config.ini", "w") as configfile:
         config.write(configfile)

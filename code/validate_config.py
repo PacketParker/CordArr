@@ -160,5 +160,6 @@ def create_config():
 
             config["JELLYFIN_ACCOUNTS"] = {
                 "JELLYFIN_URL": "",
-                "JELLYFIN_API_KEY": ""
+                "JELLYFIN_API_KEY": "",
+                "ACCOUNT_TIME": ""
             }
