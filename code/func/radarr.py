@@ -30,25 +30,26 @@ def get_movies(name: str):
     if response[0]["added"] != "0001-01-01T05:51:00Z":
         return "ALREADY ADDED"
 
-    # Add the top 5 movies and their years to a list of dictionaries and their respective tmdbIds
-    movies = [
-        {"title": response[i]["title"], "year": response[i]["year"]}
-        for i in range(min(5, len(response)))
-    ]
-    tmdb_ids = {}
+    movie_data = []
     for i in range(min(5, len(response))):
-        tmdb_ids[response[i]["tmdbId"]] = {"description": response[i]["overview"]}
-        # Try to choose from one of the usual 2 poster images available,
-        # if not, then just set the "poster" to None
+        movie_data.append(
+            {
+                "title": response[i]["title"],
+                "year": response[i]["year"],
+                "tmdbId": response[i]["tmdbId"],
+                "description": response[i]["overview"],
+            }
+        )
+
         try:
             try:
-                tmdb_ids[response[i]["tmdbId"]]["remotePoster"] = response[i]["images"][0]["remoteUrl"]
+                movie_data[i]["remotePoster"] = response[i]["images"][0]["remoteUrl"]
             except IndexError:
-                tmdb_ids[response[i]["tmdbId"]]["remotePoster"] = response[i]["images"][1]["remoteUrl"]
+                movie_data[i]["remotePoster"] = response[i]["images"][1]["remoteUrl"]
         except IndexError:
-            tmdb_ids[response[i]["tmdbId"]]["remotePoster"] = None
+            movie_data[i]["remotePoster"] = None
 
-    return movies, tmdb_ids
+    return movie_data
 
 
 """
@@ -79,39 +80,40 @@ def add_movie(tmdb_id: int):
 
 
 class AddMovieView(discord.ui.View):
-    def __init__(self, movies: list, tmdb_ids: dict, *, timeout=180.0):
+    def __init__(self, movie_data: list, *, timeout=180.0):
         super().__init__(timeout=timeout)
-        self.add_item(AddMovieDropdown(movies, tmdb_ids))
+        self.add_item(AddMovieDropdown(movie_data))
 
 
 class AddMovieDropdown(discord.ui.Select):
-    def __init__(self, movies: list, tmdb_ids: dict, *, timeout=180.0):
-        self.movies = movies
-        self.tmdb_ids = tmdb_ids
+    def __init__(self, movie_data: list, *, timeout=180.0):
+        self.movie_data = movie_data
+        # Create the options list to show the movie title, year, and tmdbId
+        options = []
+        for i in range(len(movie_data)):
+            options.append(
+                discord.SelectOption(
+                    label=f"{movie_data[i]['title']} ({movie_data[i]['year']})",
+                    description=f"TMDB ID: {movie_data[i]['tmdbId']}",
+                    value=i,
+                )
+            )
+
         super().__init__(
             placeholder="Select from the dropdown",
-            options=[
-                discord.SelectOption(label=f"{movie['title']} ({movie['year']})")
-                for movie in movies
-            ],
+            options=options,
         )
 
     async def callback(self, interaction: discord.Interaction):
-        # Convert the options to a list of strings and get the index of the selected option
-        string_options = [option.label for option in self.options]
-        index = string_options.index(interaction.data["values"][0])
-        # Convert the tmdbIds dictionary to a list and get the tmdbId of the selected movie
-        tmdb_id_list = list(self.tmdb_ids.keys())
-        tmdb_id = tmdb_id_list[index]
-        tmdbFull = self.tmdb_ids[tmdb_id]
+        index = int(self.values[0])
 
         embed = discord.Embed(
             title="Is this the movie you want to add?",
-            description=f"**{self.movies[index]['title']}**\n\n{tmdbFull['description']}",
-            color=0xD01B86
+            description=f"**{self.movie_data[index]['title']}**\n\n{self.movie_data[index]['description']}",
+            color=0xD01B86,
         )
-        embed.set_image(url=tmdbFull["remotePoster"])
-        view = RequestButtonView(tmdb_id)
+        embed.set_image(url=self.movie_data[index]["remotePoster"])
+        view = RequestButtonView(self.movie_data[index]["tmdbId"])
         await interaction.response.edit_message(embed=embed, view=view)
 
 
@@ -131,15 +133,9 @@ class RequestButtonView(discord.ui.View):
         embed = discord.Embed(
             title="Movie Requested",
             description=f"**{movie_title}** has been requested and will be added to the Radarr library. You can check the download status of your requested movies by running the `/status` command. Please wait ~5 minutes for Radarr to find a download for the movie.",
-            color=0xD01B86
+            color=0xD01B86,
         )
         await interaction.response.edit_message(embed=embed, view=None)
-        # # Add the movie to the Radarr library
-        # requests.post(
-        #     f"{RADARR_HOST_URL}/api/v3/command",
-        #     headers=RADARR_HEADERS,
-        #     json={"name": "MoviesSearch", "movieIds": movie_id},
-        # )
 
         # Keep track of the movie for the `/status` command
         db = sqlite3.connect("cordarr.db")
@@ -158,6 +154,6 @@ class RequestButtonView(discord.ui.View):
         embed = discord.Embed(
             title="Request Cancelled",
             description="Request has been cancelled. If you would like to request a different movie, run the `/request movie` command again.",
-            color=0xD01B86
+            color=0xD01B86,
         )
         await interaction.response.edit_message(embed=embed, view=None)
