@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="cordarr.png" width="200" alt="Guava Image"></a>
+  <img src="cordarr.png" width="200" alt="CordArr Logo"></a>
   <br>
   CordArr<br>
 </h1>
@@ -57,4 +57,4 @@ ACCOUNT_TIME | Amount of time, in hours, that temporary Jellyfin accounts should
 <br>
 <br>
 
-If you have any questions, feel free to email at [contact@pkrm.dev](mailto:contact@pkrm.dev). Thank you for checking out Guava, and happy coding.
+If you have any questions, feel free to email at [contact@pkrm.dev](mailto:contact@pkrm.dev). Thank you for checking out CordArr, and happy coding.
