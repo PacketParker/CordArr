@@ -136,6 +136,12 @@ class RequestButtonView(discord.ui.View):
             color=0xD01B86,
         )
         await interaction.response.edit_message(embed=embed, view=None)
+        # Force Radarr to search for the movie
+        requests.post(
+            f"{RADARR_HOST_URL}/api/v3/command",
+            headers=RADARR_HEADERS,
+            json={"name": "MoviesSearch", "movieIds": [movie_id]},
+        )
 
         # Keep track of the movie for the `/status` command
         db = sqlite3.connect("cordarr.db")
