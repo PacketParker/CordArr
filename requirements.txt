@@ -1,4 +1,4 @@
 colorlog==6.8.2
 discord.py==2.3.2
-requests==2.31.0
+requests==2.32.0
 humanize==4.9.0
