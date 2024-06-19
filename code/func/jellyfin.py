@@ -46,9 +46,6 @@ def create_jellyfin_account(user_id):
         json=account_policy,
     )
     if request_3.status_code != 204:
-        print(request_3.json())
-        print(request_3.status_code)
-        print("BROKEN AT REQUEST 3")
         return False
 
     # Add the information to the database
@@ -62,3 +59,29 @@ def create_jellyfin_account(user_id):
     db.close()
 
     return username, password
+
+
+"""
+Delete a specific Jellyfin account and return True/False
+"""
+
+
+def delete_jellyfin_account(jellyfin_user_id):
+    request = requests.delete(
+        f"{JELLYFIN_URL}/Users/{jellyfin_user_id}",
+        headers=JELLYFIN_HEADERS,
+    )
+    # If 204 - account deleted
+    # If 404 - account not found
+    # Either way, remove account from database
+    if request.status_code in (404, 204):
+        db = sqlite3.connect("cordarr.db")
+        cursor = db.cursor()
+        cursor.execute(
+            "DELETE FROM jellyfin_accounts WHERE jellyfin_user_id = ?",
+            (jellyfin_user_id,),
+        )
+        db.commit()
+        db.close()
+        return True
+    return False

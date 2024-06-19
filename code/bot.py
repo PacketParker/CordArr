@@ -6,6 +6,7 @@ import sqlite3
 import os
 
 from validate_config import create_config
+from func.jellyfin import delete_jellyfin_account
 from global_variables import LOG, BOT_TOKEN
 
 
@@ -35,16 +36,15 @@ async def on_ready():
 
 @tasks.loop(seconds=60)
 async def delete_old_temp_accounts():
-    # Delete all of the temporary Jellyfin accounts that have passed
-    # their expiration time
+    # Get all jellyfin user IDs that have passed their deletion time
     db = sqlite3.connect("cordarr.db")
     cursor = db.cursor()
-    cursor.execute(
-        "DELETE FROM jellyfin_accounts WHERE deletion_time < ?",
-        (datetime.datetime.now(),),
-    )
-    db.commit()
-    db.close()
+    cursor.execute("SELECT jellyfin_user_id FROM jellyfin_accounts WHERE deletion_time < ?", (datetime.datetime.now(),))
+    jellyfin_user_ids = cursor.fetchall()
+
+    # Delete the Jellyfin accounts
+    for jellyfin_user_id in jellyfin_user_ids:
+        delete_jellyfin_account(jellyfin_user_id[0])
 
 
 if __name__ == "__main__":
