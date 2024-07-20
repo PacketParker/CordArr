@@ -38,7 +38,8 @@ except FileNotFoundError:
     config["JELLYFIN_ACCOUNTS"] = {
         "JELLYFIN_URL": "",
         "JELLYFIN_API_KEY": "",
-        "ACCOUNT_TIME": ""
+        "ACCOUNT_TIME": "",
+        "SIMPLE_PASSWORDS": "",
     }
 
     with open("config.ini", "w") as configfile:
@@ -74,3 +75,8 @@ JELLYFIN_HEADERS = {
     "Content-Type": "application/json",
     "X-Emby-Token": JELLYFIN_API_KEY,
 }
+
+if config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"].lower() in YES_VALUES:
+    SIMPLE_PASSWORDS = True
+else:
+    SIMPLE_PASSWORDS = False

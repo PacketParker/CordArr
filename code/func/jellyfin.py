@@ -5,7 +5,7 @@ import string
 import sqlite3
 from wonderwords import RandomWord
 
-from global_variables import JELLYFIN_URL, JELLYFIN_HEADERS, ACCOUNT_TIME
+from global_variables import JELLYFIN_URL, JELLYFIN_HEADERS, ACCOUNT_TIME, SIMPLE_PASSWORDS
 
 """
 Create a new Jellyfin account for the user and return the username and password
@@ -14,7 +14,10 @@ Create a new Jellyfin account for the user and return the username and password
 
 def create_jellyfin_account(user_id):
     username = RandomWord().word(word_min_length=5, word_max_length=5)
-    password = "".join(random.choices(string.ascii_lowercase + string.digits, k=15))
+    if SIMPLE_PASSWORDS:
+        password = RandomWord().word(word_min_length=5, word_max_length=10)
+    else:
+        password = "".join(random.choices(string.ascii_lowercase + string.digits, k=15))
 
     deletion_time = datetime.datetime.now() + datetime.timedelta(hours=ACCOUNT_TIME)
     # Create the new Jellyfin account

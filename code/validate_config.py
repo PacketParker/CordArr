@@ -96,6 +96,14 @@ def validate_config(file_contents):
                 except ValueError:
                     LOG.error("Invalid value passed to ACCOUNT_TIME. Pass a valid integer value (e.g. 24)")
                     errors += 1
+                # Validate SIMPLE_PASSWORDS
+                if not config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"]:
+                    LOG.error("Empty SIMPLE_PASSWORDS passed. Pass a true/false value.")
+                    errors += 1
+                else:
+                    if (config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"].lower() not in YES_VALUES + NO_VALUES):
+                        LOG.error("Invalid value passed to SIMPLE_PASSWORDS. Pass a true/false value.")
+                        errors += 1
 
                 # Make sure connection to Jellyfin API can be established
                 jellyfin_headers = {
@@ -161,5 +169,6 @@ def create_config():
             config["JELLYFIN_ACCOUNTS"] = {
                 "JELLYFIN_URL": "",
                 "JELLYFIN_API_KEY": "",
-                "ACCOUNT_TIME": ""
+                "ACCOUNT_TIME": "",
+                "SIMPLE_PASSWORDS": "",
             }
