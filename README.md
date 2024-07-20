@@ -53,6 +53,7 @@ Field | Description
 JELLYFIN_URL | URL for your Jellyfin server (e.g. http://localhost:8096)
 JELLYFIN_API_KEY | API key for Jellyfin - can be created in `Dashboard > API Keys`
 ACCOUNT_TIME | Amount of time, in hours, that temporary Jellyfin accounts should exist before being deleted
+SIMPLE_ACCOUNTS | `true/false` : Whether or not to have simple dictionary word passwords for temporary accounts
 
 <br>
 <br>
