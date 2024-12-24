@@ -37,9 +37,14 @@ def validate_config(file_contents):
 
         # Make sure connection to Radarr API can be established
         try:
-            requests.get(config["REQUIRED"]["RADARR_HOST_URL"], headers=radarr_headers)
+            requests.get(
+                config["REQUIRED"]["RADARR_HOST_URL"], headers=radarr_headers
+            )
         except requests.exceptions.ConnectionError:
-            LOG.error("Could not connect to Radarr API. Please check your RADARR_HOST_URL and RADARR_API_KEY")
+            LOG.error(
+                "Could not connect to Radarr API. Please check your"
+                " RADARR_HOST_URL and RADARR_API_KEY"
+            )
             errors += 1
 
         # Validate ROOT_FOLDER_PATH
@@ -60,11 +65,18 @@ def validate_config(file_contents):
             not config["REQUIRED"]["QUALITY_PROFILE_ID"]
             or config["REQUIRED"]["QUALITY_PROFILE_ID"] not in all_ids
         ):
-            config["AVAILABLE_QUALITY_IDS"] = {}
+            available_ids = {}
             for entry in data:
-                config["AVAILABLE_QUALITY_IDS"][str(entry["id"])] = entry["name"]
+                available_ids[str(entry["id"])] = entry["name"]
 
-            LOG.error("Empty or invalid QUALITY_PROFILE_ID passed. Pass one of the valid IDs which are now listed within the config.ini file.")
+            LOG.info("Available QUALITY_PROFILE_IDs:")
+            for key, value in available_ids.items():
+                LOG.info(f"ID: {key} - Name: {value}")
+
+            LOG.error(
+                "Empty or invalid QUALITY_PROFILE_ID passed. Pass one of the"
+                " valid IDs which are now logged above."
+            )
             errors += 1
 
         # Validate ENABLE_JELLYFIN_TEMP_ACCOUNTS
@@ -74,41 +86,75 @@ def validate_config(file_contents):
 
         else:
             # Validate the value of ENABLE_JELLYFIN_TEMP_ACCOUNTS
-            if (config["REQUIRED"]["ENABLE_JELLYFIN_TEMP_ACCOUNTS"].lower() not in YES_VALUES + NO_VALUES):
-                LOG.error("Invalid value passed to ENABLE_JELLYFIN_TEMP_ACCOUNTS. Pass a true/false value.")
+            if (
+                config["REQUIRED"]["ENABLE_JELLYFIN_TEMP_ACCOUNTS"].lower()
+                not in YES_VALUES + NO_VALUES
+            ):
+                LOG.error(
+                    "Invalid value passed to ENABLE_JELLYFIN_TEMP_ACCOUNTS."
+                    " Pass a true/false value."
+                )
                 errors += 1
 
-            if (config["REQUIRED"]["ENABLE_JELLYFIN_TEMP_ACCOUNTS"].lower() in YES_VALUES):
+            if (
+                config["REQUIRED"]["ENABLE_JELLYFIN_TEMP_ACCOUNTS"].lower()
+                in YES_VALUES
+            ):
                 # Validate JELLYFIN_URL
                 if not config["JELLYFIN_ACCOUNTS"]["JELLYFIN_URL"]:
-                    LOG.error("Empty URL passed to JELLYFIN_URL. Pass a valid URL (e.g. http://localhost:8096)")
+                    LOG.error(
+                        "Empty URL passed to JELLYFIN_URL. Pass a valid URL"
+                        " (e.g. http://localhost:8096)"
+                    )
                     errors += 1
                 # Validate JELLYFIN_API_KEY
                 if not config["JELLYFIN_ACCOUNTS"]["JELLYFIN_API_KEY"]:
-                    LOG.error("Empty JELLYFIN_API_KEY passed. Create a Jellyfin API key in your Jellyfin dashboard and pass it here.")
+                    LOG.error(
+                        "Empty JELLYFIN_API_KEY passed. Create a Jellyfin API"
+                        " key in your Jellyfin dashboard and pass it here."
+                    )
                     errors += 1
                 # Validate ACCOUNT_TIME
                 if not config["JELLYFIN_ACCOUNTS"]["ACCOUNT_TIME"]:
-                    LOG.error("Empty ACCOUNT_TIME passed. Pass a valid time in the format of HH:MM:SS (e.g. 00:30:00)")
+                    LOG.error(
+                        "Empty ACCOUNT_TIME passed. Pass a valid time in the"
+                        " format of HH:MM:SS (e.g. 00:30:00)"
+                    )
                     errors += 1
                 try:
                     time = int(config["JELLYFIN_ACCOUNTS"]["ACCOUNT_TIME"])
                 except ValueError:
-                    LOG.error("Invalid value passed to ACCOUNT_TIME. Pass a valid integer value (e.g. 24)")
+                    LOG.error(
+                        "Invalid value passed to ACCOUNT_TIME. Pass a valid"
+                        " integer value (e.g. 24)"
+                    )
                     errors += 1
                 # Validate SIMPLE_PASSWORDS
                 if not config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"]:
-                    LOG.error("Empty SIMPLE_PASSWORDS passed. Pass a true/false value.")
+                    LOG.error(
+                        "Empty SIMPLE_PASSWORDS passed. Pass a true/false"
+                        " value."
+                    )
                     errors += 1
                 else:
-                    if (config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"].lower() not in YES_VALUES + NO_VALUES):
-                        LOG.error("Invalid value passed to SIMPLE_PASSWORDS. Pass a true/false value.")
+                    if (
+                        config["JELLYFIN_ACCOUNTS"]["SIMPLE_PASSWORDS"].lower()
+                        not in YES_VALUES + NO_VALUES
+                    ):
+                        LOG.error(
+                            "Invalid value passed to SIMPLE_PASSWORDS. Pass a"
+                            " true/false value."
+                        )
                         errors += 1
 
                 # Make sure connection to Jellyfin API can be established
                 jellyfin_headers = {
                     "Content-Type": "application/json",
-                    "Authorization": f"MediaBrowser Client=\"other\", device=\"CordArr\", DeviceId=\"cordarr-device-id\", Version=\"0.0.0\", Token=\"{config['JELLYFIN_ACCOUNTS']['JELLYFIN_API_KEY']}\"",
+                    "Authorization": (
+                        'MediaBrowser Client="other", device="CordArr",'
+                        ' DeviceId="cordarr-device-id", Version="0.0.0",'
+                        f' Token="{config["JELLYFIN_ACCOUNTS"]["JELLYFIN_API_KEY"]}"'
+                    ),
                 }
 
                 response = requests.get(
@@ -116,15 +162,25 @@ def validate_config(file_contents):
                     headers=jellyfin_headers,
                 )
                 if response.status_code != 200:
-                    LOG.error("Could not connect to Jellyfin API. Please check your JELLYFIN_URL and JELLYFIN_API_KEY")
+                    LOG.error(
+                        "Could not connect to Jellyfin API. Please check your"
+                        " JELLYFIN_URL and JELLYFIN_API_KEY"
+                    )
                     errors += 1
 
         if errors > 0:
-            LOG.info(f"Found {errors} error(s) in the configuration file. Please fix them before restarting the application.")
+            LOG.info(
+                f"Found {errors} error(s) in the configuration file. Please"
+                " fix them before restarting the application."
+            )
             exit()
 
     except KeyError:
-        LOG.critical("You are missing at least one of the configuration options in your config.ini file. In order to regenerate all options, delete the config.ini file and restart the application.")
+        LOG.critical(
+            "You are missing at least one of the configuration options in your"
+            " config.ini file. In order to regenerate all options, delete the"
+            " config.ini file and restart the application."
+        )
         exit()
 
 
@@ -137,8 +193,13 @@ def create_config():
     # While here, we can begin by making the database
     db = sqlite3.connect("cordarr.db")
     cursor = db.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS movies (user_id, movie_id, movie_title)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS jellyfin_accounts (user_id, jellyfin_user_id, deletion_time, PRIMARY KEY (user_id))")
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS movies (user_id, movie_id, movie_title)"
+    )
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS jellyfin_accounts (user_id,"
+        " jellyfin_user_id, deletion_time, PRIMARY KEY (user_id))"
+    )
     db.commit()
     db.close()
 
