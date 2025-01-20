@@ -1,0 +1,7 @@
+services:
+    cordarr:
+        container_name: cordarr
+        image: ghcr.io/packetparker/cordarr:latest
+        volumes:
+            - /path/on/system:/config
+            - /path/on/system:/data

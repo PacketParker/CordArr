@@ -2,6 +2,7 @@ import jsonschema
 import validators
 import yaml
 import sys
+import os
 import logging
 import requests
 import sqlite3
@@ -103,8 +104,13 @@ def load_config() -> None:
     If the file does not exist, generate it
     """
     database_setup()
+    if os.path.exists("/.dockerenv"):
+        file_path = "/config/config.yaml"
+    else:
+        file_path = "config.yaml"
+
     try:
-        with open("config.yaml", "r") as f:
+        with open(file_path, "r") as f:
             contents = f.read()
             validate_config(contents)
 

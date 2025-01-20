@@ -25,7 +25,20 @@
 
 CordArr is a self-hosted Discord bot that allows you to add new movies or shows to your Radarr/Sonarr libraries, and allow users to create temporary Jellyfin accounts on your server.
 
-# Instructions
+# Self-hosting
+
+## Docker
+To run Guava in Docker, use the provided [docker-compose.yaml](docker-compose.yaml) file as a template for the container. Use the configuration section below to fill out the necessary information.
+
+## Bare metal
+To run Guava on bare metal, follow the steps below.
+
+1. Install Python 3 and Pip
+2. Clone this repository
+3. Install the requirements with `pip install -r requirements.txt`
+4. Run the `code/bot.py` file
+5. Input information into the newly created config.yaml file.
+6. Re-run the `code/bot.py` file.
 
 CordArr is built on Python and requires you to install all of the dependencies in the `requirements.txt` file. To do this, you can run the pip install command like `pip install -r requirements.txt`
 
