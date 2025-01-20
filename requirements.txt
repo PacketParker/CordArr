@@ -1,5 +1,9 @@
 colorlog==6.8.2
-discord.py==2.3.2
 requests==2.32.0
 humanize==4.9.0
 wonderwords==2.2.0
+
+# validators
+# jsonschema
+# pyyaml
+# discord py

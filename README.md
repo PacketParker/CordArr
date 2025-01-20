@@ -25,37 +25,30 @@
 
 CordArr is a self-hosted Discord bot that allows you to add new movies or shows to your Radarr/Sonarr libraries, and allow users to create temporary Jellyfin accounts on your server.
 
-*NOTE: Sonarr support is currently in the works*
-
 # Instructions
 
 CordArr is built on Python and requires you to install all of the dependencies in the `requirements.txt` file. To do this, you can run the pip install command like `pip install -r requirements.txt`
 
-On first run you will likely get a critical warning in your console, don't worry, this is expected. It will automatically create a `config.ini` file for you in the root of the directory with all of the necessary configuration options.
+You must then fill out the `config.yaml` file with the necessary information. If the file does not exist already, run the bot once to generate the file.
 
-Fill out the configuration options, then re-run the bot, and everything *should* just work. For information on each configuration option, look below.
-
+# Configuration
+## BOT_INFO
 Field | Description
 --- | ---
 BOT_TOKEN | The token for your bot. Create a bot at [discord.com/developers](https://discord.com/developers)
-RADARR_HOST_URL | URL for your Radarr instance (e.g. http://localhost:7878)
-RADARR_API_KEY | API key for Radarr, found in `Settings > General > API Key`
-ROOT_FOLDER_PATH | Path for media root folder, found at the bottom of the page in `Settings > Media Management`
-QUALITY_PROFILE_ID | ID for the quality profile on Radarr (in order to get a list of your quality profiles and their IDs, set the other fields first, then re-run CordArr, the config.ini file will update with this information)
-ENABLE_JELLYFIN_TEMP_ACCOUNT | `true/false` : Whether or not to enable the `/newaccount` command allowing users to create temporary Jellyfin accounts
 
-<br>
-
-If you choose to enable the Jellyfin temp accounts features, these fields will also be required
-
+## RADARR / SONARR | OPTIONAL
 Field | Description
 --- | ---
-JELLYFIN_URL | URL for your Jellyfin server (e.g. http://localhost:8096)
-JELLYFIN_API_KEY | API key for Jellyfin - can be created in `Dashboard > API Keys`
-ACCOUNT_TIME | Amount of time, in hours, that temporary Jellyfin accounts should exist before being deleted
-SIMPLE_ACCOUNTS | `true/false` : Whether or not to have simple dictionary word passwords for temporary accounts
+HOST_URL | URL for your Radarr/Sonarr instance (e.g. http://localhost:7878)
+API_KEY | API key for Radarr/Sonarr, found in `Settings > General > API Key`
+ROOT_FOLDER_PATH | Folder path found at the bottom of the page in `Settings > Media Management`
+QUALITY_PROFILE_ID | ID for the quality profile to download content in. Run the bot once to get a list of profiles and their IDs
 
-<br>
-<br>
-
-If you have any questions, feel free to email at [contact@pkrm.dev](mailto:contact@pkrm.dev). Thank you for checking out CordArr, and happy coding.
+## JELLYFIN | OPTIONAL
+Field | Description
+--- | ---
+URL | URL for your Jellyfin server (e.g. http://localhost:8096)
+API_KEY | API key for Jellyfin - can be created in `Dashboard > API Keys`
+ACCOUNT_TIME | Amount of time, in hours, accounts should exist before being deleted
+SIMPLE_PASSWORDS | `true/false` : Whether or not to have simple dictionary word passwords for temporary accounts

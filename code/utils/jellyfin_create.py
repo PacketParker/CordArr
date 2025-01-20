@@ -1,31 +1,45 @@
 import datetime
 import requests
 import random
-import string
 import sqlite3
 from wonderwords import RandomWord
+from string import ascii_lowercase, digits
 
-from global_variables import JELLYFIN_URL, JELLYFIN_HEADERS, ACCOUNT_TIME, SIMPLE_PASSWORDS
-
-"""
-Create a new Jellyfin account for the user and return the username and password
-"""
+from utils.config import (
+    JELLYFIN_URL,
+    JELLYFIN_HEADERS,
+    ACCOUNT_TIME,
+    SIMPLE_PASSWORDS,
+)
 
 
 def create_jellyfin_account(user_id):
+    """
+    Create a new Jellyfin account for the user and return the username and password
+
+    Args:
+        user_id (int): Discord user ID to create the account for
+
+    Returns:
+        tuple: The username and password of the new Jellyfin account
+    """
+    # Create username/password
     username = RandomWord().word(word_min_length=5, word_max_length=5)
     if SIMPLE_PASSWORDS:
         password = RandomWord().word(word_min_length=5, word_max_length=10)
     else:
-        password = "".join(random.choices(string.ascii_lowercase + string.digits, k=15))
+        password = "".join(random.choices(ascii_lowercase + digits, k=15))
 
-    deletion_time = datetime.datetime.now() + datetime.timedelta(hours=ACCOUNT_TIME)
+    deletion_time = datetime.datetime.now() + datetime.timedelta(
+        minutes=ACCOUNT_TIME * 60
+    )
     # Create the new Jellyfin account
     request_1 = requests.post(
         f"{JELLYFIN_URL}/Users/New",
         headers=JELLYFIN_HEADERS,
         json={"Name": username, "Password": password},
     )
+
     if request_1.status_code != 200:
         return False
 
@@ -56,36 +70,11 @@ def create_jellyfin_account(user_id):
     db = sqlite3.connect("cordarr.db")
     cursor = db.cursor()
     cursor.execute(
-        "INSERT INTO jellyfin_accounts (user_id, jellyfin_user_id, deletion_time) VALUES (?, ?, ?)",
+        "INSERT INTO jellyfin_accounts (user_id, jellyfin_user_id,"
+        " deletion_time) VALUES (?, ?, ?)",
         (user_id, jellyfin_user_id, deletion_time),
     )
     db.commit()
     db.close()
 
     return username, password
-
-
-"""
-Delete a specific Jellyfin account and return True/False
-"""
-
-
-def delete_jellyfin_account(jellyfin_user_id):
-    request = requests.delete(
-        f"{JELLYFIN_URL}/Users/{jellyfin_user_id}",
-        headers=JELLYFIN_HEADERS,
-    )
-    # If 204 - account deleted
-    # If 404 - account not found
-    # Either way, remove account from database
-    if request.status_code in (404, 204):
-        db = sqlite3.connect("cordarr.db")
-        cursor = db.cursor()
-        cursor.execute(
-            "DELETE FROM jellyfin_accounts WHERE jellyfin_user_id = ?",
-            (jellyfin_user_id,),
-        )
-        db.commit()
-        db.close()
-        return True
-    return False

@@ -1,53 +1,111 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
+from typing import Literal
 
-from func.radarr import get_movies, AddMovieView
+from utils.content_get import get_content
+from utils.content_view import AddContentView
+from utils.config import (
+    RADARR_HOST_URL,
+    RADARR_HEADERS,
+    RADARR_ROOT_FOLDER_PATH,
+    RADARR_QUALITY_PROFILE_ID,
+    SONARR_HOST_URL,
+    SONARR_HEADERS,
+    SONARR_ROOT_FOLDER_PATH,
+    SONARR_QUALITY_PROFILE_ID,
+)
 
 
-class Request(commands.GroupCog, name="request"):
+class Request(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="movie")
-    @app_commands.describe(name="Name of the movie to add")
-    async def request_movie(self, interaction: discord.Interaction, name: str):
-        "Request a movie to be added to the Radarr library"
-        movie_data = get_movies(name)
-        if movie_data == "NO RESULTS":
+    @app_commands.command()
+    @app_commands.describe(form="Are you requesting a Movie or Show?")
+    @app_commands.describe(name="Name of the content")
+    async def request(
+        self,
+        interaction: discord.Interaction,
+        form: Literal["Movie", "Show"],
+        name: str,
+    ) -> None:
+        """Request a movie or tv show to be added to the library"""
+        # Get matching content from relevant service
+        if form == "Movie":
+            content_data = get_content(
+                name, "radarr", RADARR_HOST_URL, RADARR_HEADERS
+            )
+        else:
+            content_data = get_content(
+                name, "sonarr", SONARR_HOST_URL, SONARR_HEADERS
+            )
+
+        if content_data == "NO RESULTS":
             embed = discord.Embed(
                 title="No Results",
-                description="No results were found for the given movie name. If you are unable to find the movie, contact an administrator to have it added manually.",
-                color=0xD01B86
+                description=(
+                    # fmt: off
+                    "No results found, please try again. Here are some tips:\n\n"
+                    "1. Double check spelling\n"
+                    "2. Add release year to the query\n"
+                    "3. Double check the \"Movie\" or \"Show\" option"
+                    # fmt: on
+                ),
+                color=0xD01B86,
             )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return await interaction.response.send_message(
+                embed=embed, ephemeral=True
+            )
 
-        if movie_data == "ALREADY ADDED":
+        if content_data == "ALREADY ADDED":
             embed = discord.Embed(
                 title="Already Added",
-                description="The movie you are trying to add has already been added to the Radarr library.\n\nYou can check the download status of your requests movies by running the `/status` command.",
-                color=0xD01B86
+                description=(
+                    f"**{name}** is already added to the"
+                    f" {'radarr' if form == 'Movie' else 'sonarr'} library. It"
+                    " may be downloading, stalled, or not found. Check the"
+                    " status of the content you have requested with"
+                    " `/status`."
+                ),
+                color=0xD01B86,
             )
-            return await interaction.response.send_message(embed=embed, ephemeral=True)
+            return await interaction.response.send_message(
+                embed=embed, ephemeral=True
+            )
 
         embed = discord.Embed(
             title="Results Found",
-            description="Please select the movie you would like to add from the dropdown below.",
-            color=0xD01B86
+            description=(
+                f"Please select from the top {len(content_data)} results from"
+                f" {'radarr' if form == 'Movie' else 'sonarr'} in the"
+                " dropdown below."
+            ),
+            color=0xD01B86,
         )
-        view = AddMovieView(movie_data)
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        # Create view with the content data and relevant service info
+        if form == "Movie":
+            view = AddContentView(
+                content_data,
+                "radarr",
+                RADARR_HOST_URL,
+                RADARR_HEADERS,
+                RADARR_ROOT_FOLDER_PATH,
+                RADARR_QUALITY_PROFILE_ID,
+            )
+        else:
+            view = AddContentView(
+                content_data,
+                "sonarr",
+                SONARR_HOST_URL,
+                SONARR_HEADERS,
+                SONARR_ROOT_FOLDER_PATH,
+                SONARR_QUALITY_PROFILE_ID,
+            )
 
-    @app_commands.command(name="show")
-    @app_commands.describe(name="Name of the show/series to add")
-    async def request_show(self, interaction: discord.Interaction, name: str):
-        "Request a show/series to be added to the Sonarr library"
-        embed = discord.Embed(
-            title="Coming Soon",
-            description="This feature is not yet implemented. Check back later.",
-            color=0xD01B86
+        await interaction.response.send_message(
+            embed=embed, view=view, ephemeral=True
         )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 async def setup(bot):

@@ -9,7 +9,9 @@ class TreeSync(commands.Cog):
     @commands.command()
     @commands.dm_only()
     @commands.is_owner()
-    async def sync(self, ctx: commands.Context, *, guild: Object = None) -> None:
+    async def sync(
+        self, ctx: commands.Context, *, guild: Object = None
+    ) -> None:
         if not guild or guild == None:
             await self.bot.tree.sync()
             await ctx.author.send("Synced commands globally")
