@@ -28,10 +28,10 @@ CordArr is a self-hosted Discord bot that allows you to add new movies or shows 
 # Self-hosting
 
 ## Docker
-To run Guava in Docker, use the provided [docker-compose.yaml](docker-compose.yaml) file as a template for the container. Use the configuration section below to fill out the necessary information.
+To run Cordarr in Docker, use the provided [docker-compose.yaml](docker-compose.yaml) file as a template for the container. Use the configuration section below to fill out the necessary information.
 
 ## Bare metal
-To run Guava on bare metal, follow the steps below.
+To run Cordarr on bare metal, follow the steps below.
 
 1. Install Python 3 and Pip
 2. Clone this repository
