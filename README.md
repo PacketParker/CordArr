@@ -40,10 +40,6 @@ To run Guava on bare metal, follow the steps below.
 5. Input information into the newly created config.yaml file.
 6. Re-run the `code/bot.py` file.
 
-CordArr is built on Python and requires you to install all of the dependencies in the `requirements.txt` file. To do this, you can run the pip install command like `pip install -r requirements.txt`
-
-You must then fill out the `config.yaml` file with the necessary information. If the file does not exist already, run the bot once to generate the file.
-
 # Configuration
 ## BOT_INFO
 Field | Description
