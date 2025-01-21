@@ -8,5 +8,7 @@ WORKDIR /
 COPY . .
 RUN pip install -r requirements.txt
 
+USER 1000:1000
+
 ENTRYPOINT [ "python" ]
 CMD [ "-u",  "code/bot.py" ]
