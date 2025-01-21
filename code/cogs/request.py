@@ -31,6 +31,8 @@ class Request(commands.Cog):
         name: str,
     ) -> None:
         """Request a movie or tv show to be added to the library"""
+        # Could take a sec. so defer the response
+        await interaction.response.defer(ephemeral=True)
         # Get matching content from relevant service
         if form == "Movie":
             content_data = get_content(
@@ -54,9 +56,7 @@ class Request(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed, ephemeral=True)
 
         if content_data == "ALREADY ADDED":
             embed = discord.Embed(
@@ -70,9 +70,7 @@ class Request(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed, ephemeral=True)
 
         embed = discord.Embed(
             title="Results Found",
@@ -103,9 +101,7 @@ class Request(commands.Cog):
                 SONARR_QUALITY_PROFILE_ID,
             )
 
-        await interaction.response.send_message(
-            embed=embed, view=view, ephemeral=True
-        )
+        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
 
 async def setup(bot):

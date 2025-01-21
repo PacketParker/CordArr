@@ -147,7 +147,7 @@ class RequestButtonView(discord.ui.View):
                 ),
                 color=0xD01B86,
             )
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.send_message(embed=embed, view=None)
         # Alert the user that the content failed to be added
         else:
             embed = discord.Embed(
@@ -158,7 +158,9 @@ class RequestButtonView(discord.ui.View):
                     f" {self.service} library."
                 ),
             )
-            return await interaction.response.send_message(embed=embed)
+            return await interaction.response.edit_message(
+                embed=embed, view=None
+            )
 
         # Keep track of the requests for the `/status` command
         db = sqlite3.connect("data/cordarr.db")
@@ -200,4 +202,4 @@ class RequestButtonView(discord.ui.View):
             ),
             color=0xD01B86,
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=None)

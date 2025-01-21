@@ -20,7 +20,7 @@ class Status(commands.Cog):
     async def status(self, interaction: discord.Interaction) -> None:
         """Get the status of the movies you have requested"""
         # Defer the response
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
 
         db = sqlite3.connect("data/cordarr.db")
         cursor = db.cursor()
@@ -42,9 +42,7 @@ class Status(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed, ephemeral=True)
 
         # Create template embed
         embed = discord.Embed(
@@ -77,7 +75,7 @@ class Status(commands.Cog):
         embed.description += radarr_desc + sonarr_desc + non_queue_desc
 
         # Send the follow-up message
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.edit_original_response(embed=embed, ephemeral=True)
 
     def unpack_content(self, requested_content: list) -> tuple:
         """
