@@ -90,18 +90,18 @@ class Status(commands.Cog):
         sonarr_content_info = {}
 
         for content in requested_content:
-            title, release_year, local_id, tmdbid, tvdbid = content
+            title, (release_year), local_id, tmdbid, tvdbid = content
             if tmdbid is not None:
-                radarr_content_info[local_id] = {
+                radarr_content_info[int(local_id)] = {
                     "title": title,
-                    "release_year": release_year,
-                    "tmdbid": tmdbid,
+                    "release_year": int(release_year),
+                    "tmdbid": int(tmdbid),
                 }
             else:
-                sonarr_content_info[local_id] = {
+                sonarr_content_info[int(local_id)] = {
                     "title": title,
-                    "release_year": release_year,
-                    "tvdbid": tvdbid,
+                    "release_year": int(release_year),
+                    "tvdbid": int(tvdbid),
                 }
 
         return radarr_content_info, sonarr_content_info
@@ -130,18 +130,18 @@ class Status(commands.Cog):
             id_str = "movieId" if service == "radarr" else "seriesId"
             # If the content was requested by the user
             if (
-                download[id_str] in content_info.keys()
-                and download[id_str] not in added_ids
+                download[int(id_str)] in content_info.keys()
+                and download[int(id_str)] not in added_ids
             ):
                 # Append local ID
-                added_ids.append(download[id_str])
+                added_ids.append(download[int(id_str)])
                 # Add the download to the embed
                 try:
                     time_left = self.process_time(download["timeleft"])
                 except KeyError:
                     time_left = "Unknown"
                 description += (
-                    f"\n**{content_info[download[id_str]]['title']} ({content_info[download[id_str]]['release_year']})**"
+                    f"\n**{content_info[download[int(id_str)]]['title']} ({content_info[download[int(id_str)]]['release_year']})**"
                     f" - Time Left: `{time_left}`"
                 )
 
@@ -167,7 +167,7 @@ class Status(commands.Cog):
         for content in requested_content:
             title, release_year, local_id, tmdbid, _ = content
             # If not in queue
-            if local_id not in added_ids:
+            if int(local_id) not in added_ids:
                 # Pull the movie data from the service
                 if tmdbid is not None:
                     data = requests.get(
@@ -188,7 +188,7 @@ class Status(commands.Cog):
                     cursor.execute(
                         "DELETE FROM requests WHERE user_id = ? AND"
                         " local_id = ?",
-                        (user_id, local_id),
+                        (user_id, int(local_id)),
                     )
                     db.commit()
                     db.close()
