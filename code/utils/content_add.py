@@ -33,6 +33,9 @@ def add_content(
         headers=headers,
     ).json()
 
+    if service == "sonarr":
+        data = data[0]
+
     data["monitored"] = True
     data["qualityProfileId"] = profile_id
     data["rootFolderPath"] = folder_path
