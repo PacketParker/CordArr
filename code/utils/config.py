@@ -44,6 +44,7 @@ JELLYFIN_URL = None
 JELLYFIN_HEADERS = None
 ACCOUNT_TIME = None
 SIMPLE_PASSWORDS = False
+JELLYFIN_PUBLIC_URL = None
 
 schema = {
     "type": "object",
@@ -89,8 +90,16 @@ schema = {
                 "url": {"type": "string"},
                 "api_key": {"type": "string"},
                 "account_time": {"type": "integer"},
+                "simple_passwords": {"type": "boolean"},
+                "public_url": {"type": "string"},
             },
-            "required": ["url", "api_key", "account_time"],
+            "required": [
+                "url",
+                "api_key",
+                "account_time",
+                "simple_passwords",
+                "public_url",
+            ],
         },
     },
     "required": ["bot_info", "radarr", "sonarr"],
@@ -175,7 +184,7 @@ def validate_config(contents) -> None:
     Args:
         contents (str): The contents of the config file
     """
-    global BOT_TOKEN, RADARR_HOST_URL, RADARR_ENABLED, RADARR_HEADERS, RADARR_ROOT_FOLDER_PATH, RADARR_QUALITY_PROFILE_ID, SONARR_ENABLED, SONARR_HOST_URL, SONARR_HEADERS, SONARR_ROOT_FOLDER_PATH, SONARR_QUALITY_PROFILE_ID, JELLYFIN_ENABLED, JELLYFIN_URL, JELLYFIN_HEADERS, ACCOUNT_TIME, SIMPLE_PASSWORDS
+    global BOT_TOKEN, RADARR_HOST_URL, RADARR_ENABLED, RADARR_HEADERS, RADARR_ROOT_FOLDER_PATH, RADARR_QUALITY_PROFILE_ID, SONARR_ENABLED, SONARR_HOST_URL, SONARR_HEADERS, SONARR_ROOT_FOLDER_PATH, SONARR_QUALITY_PROFILE_ID, JELLYFIN_ENABLED, JELLYFIN_URL, JELLYFIN_HEADERS, ACCOUNT_TIME, SIMPLE_PASSWORDS, JELLYFIN_PUBLIC_URL
 
     config = yaml.safe_load(contents)
 
@@ -224,6 +233,7 @@ def validate_config(contents) -> None:
         }
         ACCOUNT_TIME = config["jellyfin"]["account_time"]
         SIMPLE_PASSWORDS = config["jellyfin"]
+        JELLYFIN_PUBLIC_URL = config["jellyfin"]["public_url"]
         JELLYFIN_ENABLED = True
 
 

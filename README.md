@@ -61,3 +61,4 @@ URL | URL for your Jellyfin server (e.g. http://localhost:8096)
 API_KEY | API key for Jellyfin - can be created in `Dashboard > API Keys`
 ACCOUNT_TIME | Amount of time, in hours, accounts should exist before being deleted
 SIMPLE_PASSWORDS | `true/false` : Whether or not to have simple dictionary word passwords for temporary accounts
+PUBLIC_URL | Public URL for your Jellyfin server. Used in the account creation message

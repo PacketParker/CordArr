@@ -5,7 +5,7 @@ import sqlite3
 
 from utils.jellyfin_create import create_jellyfin_account
 from utils.config import (
-    JELLYFIN_URL,
+    JELLYFIN_PUBLIC_URL,
     JELLYFIN_ENABLED,
     ACCOUNT_TIME,
 )
@@ -63,8 +63,8 @@ class NewAccount(commands.Cog):
                 title="Jellyfin Account Information",
                 description=(
                     # fmt: off
-                    "Here is your temporary account information.\n\n"
-                    f"**Server URL:** `{JELLYFIN_URL}`\n"
+                    "Here is your temporary account information.\n\n",
+                    f"**Server URL:** `[{JELLYFIN_PUBLIC_URL}]({JELLYFIN_PUBLIC_URL})`\n"
                     f"**Username:** `{response[0]}`\n"
                     f"**Password:** `{response[1]}`\n\n"
                     "Your account will be automatically deleted in"
