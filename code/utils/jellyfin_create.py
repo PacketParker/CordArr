@@ -67,7 +67,7 @@ def create_jellyfin_account(user_id):
         return False
 
     # Add the information to the database
-    db = sqlite3.connect("cordarr.db")
+    db = sqlite3.connect("data/cordarr.db")
     cursor = db.cursor()
     cursor.execute(
         "INSERT INTO jellyfin_accounts (user_id, jellyfin_user_id,"

@@ -19,7 +19,7 @@ class Status(commands.Cog):
     @app_commands.command()
     async def status(self, interaction: discord.Interaction) -> None:
         """Get the status of the movies you have requested"""
-        db = sqlite3.connect("cordarr.db")
+        db = sqlite3.connect("data/cordarr.db")
         cursor = db.cursor()
         cursor.execute(
             "SELECT title, release_year, local_id, tmdbid, tvdbid FROM"
@@ -183,7 +183,7 @@ class Status(commands.Cog):
                 # If the movie has a file, then it has finished downloading
                 if data.get("hasFile", True):
                     # Remove from database
-                    db = sqlite3.connect("cordarr.db")
+                    db = sqlite3.connect("data/cordarr.db")
                     cursor = db.cursor()
                     cursor.execute(
                         "DELETE FROM requests WHERE user_id = ? AND"

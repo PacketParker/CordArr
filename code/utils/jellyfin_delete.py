@@ -10,7 +10,7 @@ def delete_accounts():
     Delete Jellyfin accounts that have passed their deletion time
     """
     # Get all expired Jellyfin accounts
-    db = sqlite3.connect("cordarr.db")
+    db = sqlite3.connect("data/cordarr.db")
     cursor = db.cursor()
     cursor.execute(
         "SELECT jellyfin_user_id FROM jellyfin_accounts WHERE"

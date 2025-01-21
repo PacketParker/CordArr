@@ -153,7 +153,9 @@ def database_setup() -> None:
     """
     Create the database if it does not exist
     """
-    db = sqlite3.connect("cordarr.db")
+    if not os.path.exists("data"):
+        os.makedirs("data")
+    db = sqlite3.connect("data/cordarr.db")
     cursor = db.cursor()
     cursor.execute(
         "CREATE TABLE IF NOT EXISTS requests (title TEXT, release_year TEXT,"

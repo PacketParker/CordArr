@@ -161,7 +161,7 @@ class RequestButtonView(discord.ui.View):
             return await interaction.response.send_message(embed=embed)
 
         # Keep track of the requests for the `/status` command
-        db = sqlite3.connect("cordarr.db")
+        db = sqlite3.connect("data/cordarr.db")
         cursor = db.cursor()
         cursor.execute(
             "INSERT INTO requests (title, release_year, local_id, tmdbid,"

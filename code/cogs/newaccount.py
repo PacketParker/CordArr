@@ -20,7 +20,7 @@ class NewAccount(commands.Cog):
     async def newaccount(self, interaction: discord.Interaction) -> None:
         """Create a new temporary Jellyfin account"""
         # Make sure the user doesn't already have an account
-        db = sqlite3.connect("cordarr.db")
+        db = sqlite3.connect("data/cordarr.db")
         cursor = db.cursor()
         cursor.execute(
             "SELECT * FROM jellyfin_accounts WHERE user_id = ?",
