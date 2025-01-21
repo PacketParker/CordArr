@@ -130,18 +130,18 @@ class Status(commands.Cog):
             id_str = "movieId" if service == "radarr" else "seriesId"
             # If the content was requested by the user
             if (
-                download[int(id_str)] in content_info.keys()
-                and download[int(id_str)] not in added_ids
+                int(download[id_str]) in content_info.keys()
+                and int(download[id_str]) not in added_ids
             ):
                 # Append local ID
-                added_ids.append(download[int(id_str)])
+                added_ids.append(int(download[id_str]))
                 # Add the download to the embed
                 try:
                     time_left = self.process_time(download["timeleft"])
                 except KeyError:
                     time_left = "Unknown"
                 description += (
-                    f"\n**{content_info[download[int(id_str)]]['title']} ({content_info[download[int(id_str)]]['release_year']})**"
+                    f"\n**{content_info[int(download[id_str])]['title']} ({content_info[int(download[id_str])]['release_year']})**"
                     f" - Time Left: `{time_left}`"
                 )
 
@@ -188,7 +188,7 @@ class Status(commands.Cog):
                     cursor.execute(
                         "DELETE FROM requests WHERE user_id = ? AND"
                         " local_id = ?",
-                        (user_id, int(local_id)),
+                        (user_id, local_id),
                     )
                     db.commit()
                     db.close()
