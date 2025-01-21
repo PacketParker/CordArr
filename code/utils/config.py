@@ -105,7 +105,7 @@ def load_config() -> None:
     """
     database_setup()
     if os.path.exists("/.dockerenv"):
-        file_path = "/config/config.yaml"
+        file_path = "config/config.yaml"
     else:
         file_path = "config.yaml"
 
@@ -115,7 +115,7 @@ def load_config() -> None:
             validate_config(contents)
 
     except FileNotFoundError:
-        with open("config.yaml", "w") as f:
+        with open(file_path, "w") as f:
             f.write(
                 """
 bot_info:
