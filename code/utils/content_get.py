@@ -44,9 +44,14 @@ def get_content(
                 "contentId": results[i][
                     f"{'tmdbId' if service == 'radarr' else 'tvdbId'}"
                 ],
-                "description": results[i]["overview"],
             }
         )
+
+        # Add overview field, set None if not available
+        try:
+            content_info[i]["overview"] = results[i]["overview"]
+        except KeyError:
+            content_info[i]["overview"] = None
 
         # Add remotePoster field, set None if not available
         try:
