@@ -49,9 +49,9 @@ def get_content(
 
         # Add overview field, set None if not available
         try:
-            content_info[i]["overview"] = results[i]["overview"]
+            content_info[i]["description"] = results[i]["overview"]
         except KeyError:
-            content_info[i]["overview"] = "No overview available"
+            content_info[i]["description"] = "No description available"
 
         # Add remotePoster field, set None if not available
         try:
