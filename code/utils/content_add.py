@@ -33,9 +33,6 @@ def add_content(
         headers=headers,
     ).json()
 
-    if len(data) > 1:
-        data = data[0]
-
     data["monitored"] = True
     data["qualityProfileId"] = profile_id
     data["rootFolderPath"] = folder_path
