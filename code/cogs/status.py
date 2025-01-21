@@ -76,8 +76,8 @@ class Status(commands.Cog):
 
         embed.description += radarr_desc + sonarr_desc + non_queue_desc
 
-        # Send the embed
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        # Send the follow-up message
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
     def unpack_content(self, requested_content: list) -> tuple:
         """
