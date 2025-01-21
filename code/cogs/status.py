@@ -188,7 +188,7 @@ class Status(commands.Cog):
                     cursor.execute(
                         "DELETE FROM requests WHERE user_id = ? AND"
                         " local_id = ?",
-                        (user_id, local_id),
+                        (user_id, int(local_id)),
                     )
                     db.commit()
                     db.close()
