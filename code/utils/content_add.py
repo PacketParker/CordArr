@@ -31,7 +31,10 @@ def add_content(
             else f"{host}/api/v3/series/lookup?term=tvdb:{content_info['contentId']}"
         ),
         headers=headers,
-    ).json()[0]
+    ).json()
+
+    if len(data) > 1:
+        data = data[0]
 
     data["monitored"] = True
     data["qualityProfileId"] = profile_id
