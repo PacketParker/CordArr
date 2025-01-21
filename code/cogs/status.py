@@ -19,6 +19,9 @@ class Status(commands.Cog):
     @app_commands.command()
     async def status(self, interaction: discord.Interaction) -> None:
         """Get the status of the movies you have requested"""
+        # Defer the response
+        await interaction.response.defer()
+
         db = sqlite3.connect("data/cordarr.db")
         cursor = db.cursor()
         cursor.execute(
@@ -73,6 +76,7 @@ class Status(commands.Cog):
 
         embed.description += radarr_desc + sonarr_desc + non_queue_desc
 
+        # Send the embed
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     def unpack_content(self, requested_content: list) -> tuple:
