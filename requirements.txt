@@ -2,7 +2,6 @@ colorlog==6.8.2
 requests==2.32.0
 wonderwords==2.2.0
 PyYAML==6.0.2
-validators==0.34.0
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
 discord.py==2.4.0

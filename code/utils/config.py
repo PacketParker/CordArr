@@ -1,5 +1,4 @@
 import jsonschema
-import validators
 import yaml
 import sys
 import os
@@ -192,15 +191,7 @@ def validate_config(contents) -> None:
     BOT_TOKEN = config["bot_info"]["bot_token"]
 
     if "radarr" in config:
-        if not validators.url(config["radarr"]["host_url"]):
-            sys.exit(
-                LOG.critical(
-                    "Error in config.yaml: Invalid URL for Radarr host"
-                )
-            )
-        else:
-            RADARR_HOST_URL = config["radarr"]["host_url"]
-
+        RADARR_HOST_URL = config["radarr"]["host_url"]
         RADARR_HEADERS = {
             "Content-Type": "application/json",
             "X-Api-Key": config["radarr"]["api_key"],
@@ -213,15 +204,7 @@ def validate_config(contents) -> None:
         RADARR_ENABLED = True
 
     if "sonarr" in config:
-        if not validators.url(config["sonarr"]["host_url"]):
-            sys.exit(
-                LOG.critical(
-                    "Error in config.yaml: Invalid URL for Sonarr host"
-                )
-            )
-        else:
-            SONARR_HOST_URL = config["sonarr"]["host_url"]
-
+        SONARR_HOST_URL = config["sonarr"]["host_url"]
         SONARR_HEADERS = {
             "Content-Type": "application/json",
             "X-Api-Key": config["sonarr"]["api_key"],
@@ -234,14 +217,7 @@ def validate_config(contents) -> None:
         SONARR_ENABLED = True
 
     if "jellyfin" in config:
-        if not validators.url(config["jellyfin"]["url"]):
-            LOG.critical(
-                "Error in config.yaml: Invalid URL for Jellyfin - account"
-                " creation disabled"
-            )
-        else:
-            JELLYFIN_URL = config["jellyfin"]["url"]
-
+        JELLYFIN_URL = config["jellyfin"]["url"]
         JELLYFIN_HEADERS = {
             "Content-Type": "application/json",
             "X-Emby-Token": config["jellyfin"]["api_key"],
