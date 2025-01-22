@@ -1,9 +1,11 @@
 import discord
 from discord import app_commands
-from discord.ext import commands
-import sqlite3
+from discord.ext import commands, tasks
 
+from utils.database import Session
 from utils.jellyfin_create import create_jellyfin_account
+from utils.jellyfin_delete import delete_accounts
+from utils.models import JellyfinAccounts
 from utils.config import (
     JELLYFIN_PUBLIC_URL,
     JELLYFIN_ENABLED,
@@ -15,19 +17,20 @@ class NewAccount(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def cog_load(self):
+        self.delete_accounts_loop.start()
+
     @app_commands.command()
     @app_commands.check(lambda inter: JELLYFIN_ENABLED)
     async def newaccount(self, interaction: discord.Interaction) -> None:
         """Create a new temporary Jellyfin account"""
         # Make sure the user doesn't already have an account
-        db = sqlite3.connect("data/cordarr.db")
-        cursor = db.cursor()
-        cursor.execute(
-            "SELECT * FROM jellyfin_accounts WHERE user_id = ?",
-            (interaction.user.id,),
-        )
-        account = cursor.fetchone()
-        db.close()
+        with Session() as session:
+            account = (
+                session.query(JellyfinAccounts)
+                .filter(JellyfinAccounts.user_id == interaction.user.id)
+                .first()
+            )
         # Account already allocated
         if account:
             embed = discord.Embed(
@@ -63,8 +66,8 @@ class NewAccount(commands.Cog):
                 title="Jellyfin Account Information",
                 description=(
                     # fmt: off
-                    "Here is your temporary account information.\n\n",
-                    f"**Server URL:** `[{JELLYFIN_PUBLIC_URL}]({JELLYFIN_PUBLIC_URL})`\n"
+                    "Here is your temporary account information.\n\n"
+                    f"**Server URL:** `{JELLYFIN_PUBLIC_URL}`\n"
                     f"**Username:** `{response[0]}`\n"
                     f"**Password:** `{response[1]}`\n\n"
                     "Your account will be automatically deleted in"
@@ -87,6 +90,10 @@ class NewAccount(commands.Cog):
             return await interaction.response.send_message(
                 embed=embed, ephemeral=True
             )
+
+    @tasks.loop(minutes=1)
+    async def delete_accounts_loop(self):
+        delete_accounts()
 
 
 async def setup(bot):

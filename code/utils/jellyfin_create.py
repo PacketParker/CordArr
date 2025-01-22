@@ -1,10 +1,11 @@
 import datetime
 import requests
 import random
-import sqlite3
 from wonderwords import RandomWord
 from string import ascii_lowercase, digits
 
+from utils.database import Session
+from utils.models import JellyfinAccounts
 from utils.config import (
     JELLYFIN_URL,
     JELLYFIN_HEADERS,
@@ -67,14 +68,14 @@ def create_jellyfin_account(user_id):
         return False
 
     # Add the information to the database
-    db = sqlite3.connect("data/cordarr.db")
-    cursor = db.cursor()
-    cursor.execute(
-        "INSERT INTO jellyfin_accounts (user_id, jellyfin_user_id,"
-        " deletion_time) VALUES (?, ?, ?)",
-        (user_id, jellyfin_user_id, deletion_time),
-    )
-    db.commit()
-    db.close()
+    with Session() as session:
+        session.add(
+            JellyfinAccounts(
+                user_id=user_id,
+                jellyfin_user_id=jellyfin_user_id,
+                deletion_time=deletion_time,
+            )
+        )
+        session.commit()
 
     return username, password
