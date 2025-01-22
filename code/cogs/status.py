@@ -2,8 +2,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import requests
-import sqlite3
 
+from utils.models import Requests
+from utils.database import Session
 from utils.config import (
     RADARR_HOST_URL,
     RADARR_HEADERS,
@@ -20,17 +21,20 @@ class Status(commands.Cog):
     async def status(self, interaction: discord.Interaction) -> None:
         """Get the status of the movies you have requested"""
         # Defer the response
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
 
-        db = sqlite3.connect("data/cordarr.db")
-        cursor = db.cursor()
-        cursor.execute(
-            "SELECT title, release_year, local_id, tmdbid, tvdbid FROM"
-            " requests WHERE user_id = ?",
-            (interaction.user.id,),
-        )
-        requested_content = cursor.fetchall()
-        db.close()
+        with Session() as session:
+            requested_content = (
+                session.query(
+                    Requests.title,
+                    Requests.release_year,
+                    Requests.local_id,
+                    Requests.tmdbid,
+                    Requests.tvdbid,
+                )
+                .filter(Requests.user_id == interaction.user.id)
+                .all()
+            )
 
         # No content requested
         if len(requested_content) == 0:
@@ -42,9 +46,7 @@ class Status(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed)
 
         # Create template embed
         embed = discord.Embed(
@@ -76,8 +78,8 @@ class Status(commands.Cog):
 
         embed.description += radarr_desc + sonarr_desc + non_queue_desc
 
-        # Send the embed
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        # Send the follow-up message
+        await interaction.followup.send(embed=embed)
 
     def unpack_content(self, requested_content: list) -> tuple:
         """
@@ -94,18 +96,18 @@ class Status(commands.Cog):
         sonarr_content_info = {}
 
         for content in requested_content:
-            title, (release_year), local_id, tmdbid, tvdbid = content
+            title, release_year, local_id, tmdbid, tvdbid = content
             if tmdbid is not None:
-                radarr_content_info[int(local_id)] = {
+                radarr_content_info[local_id] = {
                     "title": title,
-                    "release_year": int(release_year),
-                    "tmdbid": int(tmdbid),
+                    "release_year": release_year,
+                    "tmdbid": tmdbid,
                 }
             else:
-                sonarr_content_info[int(local_id)] = {
+                sonarr_content_info[local_id] = {
                     "title": title,
-                    "release_year": int(release_year),
-                    "tvdbid": int(tvdbid),
+                    "release_year": release_year,
+                    "tvdbid": tvdbid,
                 }
 
         return radarr_content_info, sonarr_content_info
@@ -171,7 +173,7 @@ class Status(commands.Cog):
         for content in requested_content:
             title, release_year, local_id, tmdbid, _ = content
             # If not in queue
-            if int(local_id) not in added_ids:
+            if local_id not in added_ids:
                 # Pull the movie data from the service
                 if tmdbid is not None:
                     data = requests.get(
@@ -187,23 +189,26 @@ class Status(commands.Cog):
                 # If the movie has a file, then it has finished downloading
                 if data.get("hasFile", True):
                     # Remove from database
-                    db = sqlite3.connect("data/cordarr.db")
-                    cursor = db.cursor()
-                    cursor.execute(
-                        "DELETE FROM requests WHERE user_id = ? AND"
-                        " local_id = ?",
-                        (user_id, int(local_id)),
-                    )
-                    db.commit()
-                    db.close()
+                    with Session() as session:
+                        request = (
+                            session.query(Requests)
+                            .filter(Requests.user_id == user_id)
+                            .filter(Requests.local_id == local_id)
+                            .first()
+                        )
+                        session.delete(request)
+                        session.commit()
+
                 # If series and only a portion of episodes have been downloaded
-                if data.get("statistics").get("percentOfEpisodes"):
-                    description += (
-                        f"\n**{title} ({release_year})** - Status: `NOT"
-                        " FOUND"
-                        f" ({int(data['statistics']['percentOfEpisodes'])}%"
-                        " of eps.)`"
-                    )
+                # If data["statistics"] exists and is not None
+                if "statistics" in data and data["statistics"] != None:
+                    if "percentOfEpisodes" in data["statistics"]:
+                        description += (
+                            f"\n**{title} ({release_year})** - Status: `NOT"
+                            " FOUND"
+                            f" ({int(data['statistics']['percentOfEpisodes'])}%"
+                            " of eps.)`"
+                        )
                 # All other scenarios, download not found
                 else:
                     description += (

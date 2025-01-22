@@ -4,7 +4,6 @@ import sys
 import os
 import logging
 import requests
-import sqlite3
 from colorlog import ColoredFormatter
 
 
@@ -108,10 +107,9 @@ schema = {
 
 def load_config() -> None:
     """
-    Load DB, then load and validate the config file
+    Load the config file and validate it
     If the file does not exist, generate it
     """
-    database_setup()
     if os.path.exists("/.dockerenv"):
         file_path = "config/config.yaml"
     else:
@@ -155,26 +153,6 @@ jellyfin:
                 " fields and restart. Refer to README for help!"
             )
         )
-
-
-def database_setup() -> None:
-    """
-    Create the database if it does not exist
-    """
-    if not os.path.exists("data"):
-        os.makedirs("data")
-    db = sqlite3.connect("data/cordarr.db")
-    cursor = db.cursor()
-    cursor.execute(
-        "CREATE TABLE IF NOT EXISTS requests (title TEXT, release_year TEXT,"
-        " local_id INTEGER, tmdbid INTEGER, tvdbid INTEGER, user_id INTEGER)"
-    )
-    cursor.execute(
-        "CREATE TABLE IF NOT EXISTS jellyfin_accounts (user_id INTEGER,"
-        " jellyfin_user_id INTEGER, deletion_time DATETIME)"
-    )
-    db.commit()
-    db.close()
 
 
 def validate_config(contents) -> None:

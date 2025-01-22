@@ -1,6 +1,7 @@
 import discord
-import sqlite3
 
+from utils.models import Requests
+from utils.database import Session
 from utils.content_add import add_content
 
 """
@@ -147,7 +148,8 @@ class RequestButtonView(discord.ui.View):
                 ),
                 color=0xD01B86,
             )
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.edit_message(view=None)
+            await interaction.followup.send(embed=embed)
         # Alert the user that the content failed to be added
         else:
             embed = discord.Embed(
@@ -158,33 +160,30 @@ class RequestButtonView(discord.ui.View):
                     f" {self.service} library."
                 ),
             )
-            return await interaction.response.send_message(embed=embed)
+            await interaction.delete_original_response()
+            return await interaction.response.edit_message(embed=embed)
 
         # Keep track of the requests for the `/status` command
-        db = sqlite3.connect("data/cordarr.db")
-        cursor = db.cursor()
-        cursor.execute(
-            "INSERT INTO requests (title, release_year, local_id, tmdbid,"
-            " tvdbid, user_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (
-                self.content_info["title"],
-                self.content_info["year"],
-                local_id,
-                (
-                    self.content_info["contentId"]
-                    if self.service == "radarr"
-                    else None
-                ),
-                (
-                    None
-                    if self.service == "radarr"
-                    else self.content_info["contentId"]
-                ),
-                interaction.user.id,
-            ),
-        )
-        db.commit()
-        db.close()
+        with Session() as session:
+            session.add(
+                Requests(
+                    title=self.content_info["title"],
+                    release_year=self.content_info["year"],
+                    local_id=local_id,
+                    tmdbid=(
+                        self.content_info["contentId"]
+                        if self.service == "radarr"
+                        else None
+                    ),
+                    tvdbid=(
+                        None
+                        if self.service == "radarr"
+                        else self.content_info["contentId"]
+                    ),
+                    user_id=interaction.user.id,
+                )
+            )
+            session.commit()
 
     @discord.ui.button(label="Don't Request", style=discord.ButtonStyle.danger)
     async def dont_request_button(
@@ -200,4 +199,4 @@ class RequestButtonView(discord.ui.View):
             ),
             color=0xD01B86,
         )
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.edit_message(embed=embed, view=None)

@@ -1,9 +1,10 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import sqlite3
 
+from utils.database import Session
 from utils.jellyfin_create import create_jellyfin_account
+from utils.models import JellyfinAccounts
 from utils.config import (
     JELLYFIN_PUBLIC_URL,
     JELLYFIN_ENABLED,
@@ -19,15 +20,15 @@ class NewAccount(commands.Cog):
     @app_commands.check(lambda inter: JELLYFIN_ENABLED)
     async def newaccount(self, interaction: discord.Interaction) -> None:
         """Create a new temporary Jellyfin account"""
+        # Defer in case it takes too long
+        await interaction.response.defer(ephemeral=True)
         # Make sure the user doesn't already have an account
-        db = sqlite3.connect("data/cordarr.db")
-        cursor = db.cursor()
-        cursor.execute(
-            "SELECT * FROM jellyfin_accounts WHERE user_id = ?",
-            (interaction.user.id,),
-        )
-        account = cursor.fetchone()
-        db.close()
+        with Session() as session:
+            account = (
+                session.query(JellyfinAccounts)
+                .filter(JellyfinAccounts.user_id == interaction.user.id)
+                .first()
+            )
         # Account already allocated
         if account:
             embed = discord.Embed(
@@ -39,9 +40,7 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed)
 
         # Create a new Jellyfin account for the user
         response = create_jellyfin_account(interaction.user.id)
@@ -54,17 +53,15 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            await interaction.followup.send(embed=embed)
 
             # Send the user their account information
             embed = discord.Embed(
                 title="Jellyfin Account Information",
                 description=(
                     # fmt: off
-                    "Here is your temporary account information.\n\n",
-                    f"**Server URL:** `[{JELLYFIN_PUBLIC_URL}]({JELLYFIN_PUBLIC_URL})`\n"
+                    "Here is your temporary account information.\n\n"
+                    f"**Server URL:** `{JELLYFIN_PUBLIC_URL}`\n"
                     f"**Username:** `{response[0]}`\n"
                     f"**Password:** `{response[1]}`\n\n"
                     "Your account will be automatically deleted in"
@@ -84,9 +81,7 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed)
 
 
 async def setup(bot):
