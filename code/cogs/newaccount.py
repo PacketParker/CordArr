@@ -1,10 +1,9 @@
 import discord
 from discord import app_commands
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from utils.database import Session
 from utils.jellyfin_create import create_jellyfin_account
-from utils.jellyfin_delete import delete_accounts
 from utils.models import JellyfinAccounts
 from utils.config import (
     JELLYFIN_PUBLIC_URL,
@@ -16,9 +15,6 @@ from utils.config import (
 class NewAccount(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    def cog_load(self):
-        self.delete_accounts_loop.start()
 
     @app_commands.command()
     @app_commands.check(lambda inter: JELLYFIN_ENABLED)
@@ -90,10 +86,6 @@ class NewAccount(commands.Cog):
             return await interaction.response.send_message(
                 embed=embed, ephemeral=True
             )
-
-    @tasks.loop(minutes=1)
-    async def delete_accounts_loop(self):
-        delete_accounts()
 
 
 async def setup(bot):
