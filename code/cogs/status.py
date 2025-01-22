@@ -200,13 +200,15 @@ class Status(commands.Cog):
                         session.commit()
 
                 # If series and only a portion of episodes have been downloaded
-                if data.get("statistics").get("percentOfEpisodes"):
-                    description += (
-                        f"\n**{title} ({release_year})** - Status: `NOT"
-                        " FOUND"
-                        f" ({int(data['statistics']['percentOfEpisodes'])}%"
-                        " of eps.)`"
-                    )
+                # If data["statistics"] exists and is not None
+                if "statistics" in data and data["statistics"] != None:
+                    if "percentOfEpisodes" in data["statistics"]:
+                        description += (
+                            f"\n**{title} ({release_year})** - Status: `NOT"
+                            " FOUND"
+                            f" ({int(data['statistics']['percentOfEpisodes'])}%"
+                            " of eps.)`"
+                        )
                 # All other scenarios, download not found
                 else:
                     description += (
