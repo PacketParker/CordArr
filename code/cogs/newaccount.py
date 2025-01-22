@@ -20,6 +20,8 @@ class NewAccount(commands.Cog):
     @app_commands.check(lambda inter: JELLYFIN_ENABLED)
     async def newaccount(self, interaction: discord.Interaction) -> None:
         """Create a new temporary Jellyfin account"""
+        # Defer in case it takes too long
+        await interaction.response.defer(ephemeral=True)
         # Make sure the user doesn't already have an account
         with Session() as session:
             account = (
@@ -38,9 +40,7 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed)
 
         # Create a new Jellyfin account for the user
         response = create_jellyfin_account(interaction.user.id)
@@ -53,9 +53,7 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            await interaction.followup.send(embed=embed)
 
             # Send the user their account information
             embed = discord.Embed(
@@ -83,9 +81,7 @@ class NewAccount(commands.Cog):
                 ),
                 color=0xD01B86,
             )
-            return await interaction.response.send_message(
-                embed=embed, ephemeral=True
-            )
+            return await interaction.followup.send(embed=embed)
 
 
 async def setup(bot):
